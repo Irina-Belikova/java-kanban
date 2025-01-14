@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TaskManager {
-    ArrayList<Subtask> list;
     private final HashMap<Integer, Task> mapOfTasks = new HashMap<>();
     private final HashMap<Integer, Subtask> mapOfSubtasks = new HashMap<>();
     private final HashMap<Integer, Epic> mapOfEpics = new HashMap<>();
@@ -38,30 +37,37 @@ public class TaskManager {
     }
 
     public Subtask addSubtasks(Subtask subtask) {
-        if (subtask.getId() != 0 || subtask.getEpicId() == 0) {
-            return subtask;
+        if (subtask.getId() != 0 || subtask.getEpicId() == 0 || !mapOfEpics.containsKey(subtask.getEpicId())) {
+            return subtask; //надеюсь правильно поняла, что нужно проверить, что эпик есть в таблице (тогда он существует)
         }
         subtask.setId(generateId());
         mapOfSubtasks.put(subtask.getId(), subtask);
         Epic epic = mapOfEpics.get(subtask.getEpicId());
         epic.getSubtasksId().add(subtask.getId());
+        checkEpicStatus(epic);
         return subtask;
     }
 
-    public HashMap<Integer, Task> getAllTasks() {
-        return mapOfTasks;
+    public ArrayList<Task> getAllTasks() {
+        ArrayList<Task> tasksList = new ArrayList<>();
+        tasksList.addAll(mapOfTasks.values());
+        return tasksList;
     }
 
-    public HashMap<Integer, Subtask> getAllSubtasks() {
-        return mapOfSubtasks;
+    public ArrayList<Subtask> getAllSubtasks() {
+        ArrayList<Subtask> subtasksList = new ArrayList<>();
+        subtasksList.addAll(mapOfSubtasks.values());
+        return subtasksList;
     }
 
-    public HashMap<Integer, Epic> getAllEpics() {
-        return mapOfEpics;
+    public ArrayList<Epic> getAllEpics() {
+        ArrayList<Epic> epicsList = new ArrayList<>();
+        epicsList.addAll(mapOfEpics.values());
+        return epicsList;
     }
 
     public ArrayList<Subtask> getEpicSubtasks(Epic epic) {
-        list = new ArrayList<>();
+        ArrayList<Subtask> list = new ArrayList<>();
         for (int i : epic.getSubtasksId()) {
             if (mapOfSubtasks.containsKey(i)) {
                 list.add(mapOfSubtasks.get(i));
@@ -87,10 +93,16 @@ public class TaskManager {
     }
 
     public void clearSubtasks() {
+        for (int id : mapOfEpics.keySet()) {
+            Epic epic = mapOfEpics.get(id);
+            epic.getSubtasksId().clear();
+            epic.setStatus(TaskStatus.NEW);
+        }
         mapOfSubtasks.clear();
     }
 
     public void clearEpics() {
+        mapOfSubtasks.clear();
         mapOfEpics.clear();
     }
 
@@ -98,21 +110,19 @@ public class TaskManager {
         mapOfTasks.remove(id);
     }
 
-    public void removeSubtaskById(Integer id) {
+    public void removeSubtaskById(int id) {
         Subtask subtask = mapOfSubtasks.get(id);
         int index = subtask.getEpicId();
         Epic epic = mapOfEpics.get(index);
-        ArrayList<Integer> listId = epic.getSubtasksId();
-        listId.remove(id);
+        epic.deleteSubtask(id);
         mapOfSubtasks.remove(id);
+        checkEpicStatus(epic);
     }
 
     public void removeEpicById(int id) {
         Epic epic = mapOfEpics.get(id);
-        for (int i : epic.getSubtasksId()) {
-            if (mapOfSubtasks.containsKey(i)) {
-                mapOfSubtasks.remove(i);
-            }
+        for (int index : epic.getSubtasksId()) {
+            mapOfSubtasks.remove(index);
         }
         mapOfEpics.remove(id);
     }
@@ -130,6 +140,8 @@ public class TaskManager {
             return subtask;
         }
         mapOfSubtasks.put(subtask.getId(), subtask);
+        Epic epic = mapOfEpics.get(subtask.getEpicId());
+        checkEpicStatus(epic);
         return subtask;
     }
 
@@ -143,26 +155,35 @@ public class TaskManager {
             mapOfEpics.put(epic.getId(), epic);
             return epic;
         }
-        for (int i : epic.getSubtasksId()) {
-            if (mapOfSubtasks.containsKey(i)) {
-                list.add(mapOfSubtasks.get(i));
-            }
-            for (Subtask sub : list) {
-                if (sub.getStatus() == TaskStatus.DONE) {
-                    epic.setStatus(TaskStatus.DONE);
-                } else if (sub.getStatus() == TaskStatus.IN_PROGRESS) {
-                    epic.setStatus(TaskStatus.IN_PROGRESS);
-                    mapOfEpics.put(epic.getId(), epic);
-                    return epic;
-                } else {
-                    epic.setStatus(TaskStatus.NEW);
-                }
-            }
-        }
-        mapOfEpics.put(epic.getId(), epic);
+        checkEpicStatus(epic);
         return epic;
     }
+
+    private void checkEpicStatus(Epic epic) {         //полностью переделала определение статуса эпика, так как
+        ArrayList<Subtask> list = new ArrayList<>();  //поняла, что первый вариант не все вероятности проверял,
+        for (int index : epic.getSubtasksId()) {          //например, 1 подзадача NEW, а остальные DONE.
+            list.add(mapOfSubtasks.get(index));
+        }
+        int aDone = 0;
+        int aNew = 0;
+        for (Subtask sub : list) {
+            if (sub.getStatus() == TaskStatus.IN_PROGRESS) {
+                epic.setStatus(TaskStatus.IN_PROGRESS);
+                mapOfEpics.put(epic.getId(), epic);
+                break;
+            } else if (sub.getStatus() == TaskStatus.DONE) {
+                aDone += 1;
+            } else {
+                aNew += 1;
+            }
+        }
+        if (aDone == list.size()) {
+            epic.setStatus(TaskStatus.DONE);
+        } else if (aNew == list.size()) {
+            epic.setStatus(TaskStatus.NEW);
+        } else {
+            epic.setStatus(TaskStatus.IN_PROGRESS);
+        }
+        mapOfEpics.put(epic.getId(), epic);
+    }
 }
-
-
-
