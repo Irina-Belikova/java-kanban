@@ -38,7 +38,7 @@ public class TaskManager {
 
     public Subtask addSubtasks(Subtask subtask) {
         if (subtask.getId() != 0 || subtask.getEpicId() == 0 || !mapOfEpics.containsKey(subtask.getEpicId())) {
-            return subtask; //надеюсь правильно поняла, что нужно проверить, что эпик есть в таблице (тогда он существует)
+            return subtask;
         }
         subtask.setId(generateId());
         mapOfSubtasks.put(subtask.getId(), subtask);
@@ -145,23 +145,19 @@ public class TaskManager {
         return subtask;
     }
 
-    public Epic changeEpic(Epic epic) {
-        if (!mapOfEpics.containsKey(epic.getId())) {
-            epic.setStatus(TaskStatus.NEW);
-            return epic;
+    public Epic changeEpic(Epic newEpic) {
+        if (!mapOfEpics.containsKey(newEpic.getId())) {
+            return newEpic;
         }
-        if (epic.getSubtasksId().isEmpty() && mapOfEpics.containsKey(epic.getId())) {
-            epic.setStatus(TaskStatus.NEW);
-            mapOfEpics.put(epic.getId(), epic);
-            return epic;
-        }
-        checkEpicStatus(epic);
+        Epic epic = mapOfEpics.get(newEpic.getId());
+        epic.setName(newEpic.getName());
+        epic.setDescription(newEpic.getDescription());
         return epic;
     }
 
-    private void checkEpicStatus(Epic epic) {         //полностью переделала определение статуса эпика, так как
-        ArrayList<Subtask> list = new ArrayList<>();  //поняла, что первый вариант не все вероятности проверял,
-        for (int index : epic.getSubtasksId()) {          //например, 1 подзадача NEW, а остальные DONE.
+    private void checkEpicStatus(Epic epic) {
+        ArrayList<Subtask> list = new ArrayList<>();
+        for (int index : epic.getSubtasksId()) {
             list.add(mapOfSubtasks.get(index));
         }
         int aDone = 0;

@@ -88,11 +88,11 @@ public class Main {
         System.out.println(epic_3);
         System.out.println();
 
-        upSubtask = new Subtask(subtask_4.getId(), "подзадача-4", "новое описание пзд-4", epic_2.getId(), TaskStatus.NEW);
+        upSubtask = new Subtask(subtask_4.getId(), "подзадача-4", "новое описание пзд-4", epic_2.getId(), TaskStatus.DONE);
         subtask_4 = tm.changeSubtask(upSubtask);
         upSubtask = new Subtask(subtask_5.getId(), "подзадача-5", "описание пзд-5", epic_2.getId(), TaskStatus.NEW);
         subtask_5 = tm.changeSubtask(upSubtask);
-        upEpic = new Epic(epic_2.getId(), "эпик-2", "новое описание эпика -2", epic_2.getSubtasksId());
+        upEpic = new Epic(epic_2.getId(), "новое имя для эпик-2", "новое описание эпика -2", epic_2.getSubtasksId());
         upEpic.setStatus(TaskStatus.DONE);
         epic_2 = tm.changeEpic(upEpic);
         System.out.println(tm.getEpicSubtasks(epic_2));
