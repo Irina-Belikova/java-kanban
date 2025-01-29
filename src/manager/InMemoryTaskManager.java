@@ -7,11 +7,13 @@ import tasks.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List; //по аналогии с комментариями к InMemoryHistoryManager исправила в методах
+import java.util.Map;  //возвращение интерфейса List вместо класса ArrayList
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HashMap<Integer, Task> mapOfTasks = new HashMap<>();
-    private final HashMap<Integer, Subtask> mapOfSubtasks = new HashMap<>();
-    private final HashMap<Integer, Epic> mapOfEpics = new HashMap<>();
+    private final Map<Integer, Task> mapOfTasks = new HashMap<>();
+    private final Map<Integer, Subtask> mapOfSubtasks = new HashMap<>();
+    private final Map<Integer, Epic> mapOfEpics = new HashMap<>();
     private static int id = 1;
     private final HistoryManager hm = Managers.getHistory();
 
@@ -53,29 +55,23 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getAllTasks() {
-        ArrayList<Task> tasksList = new ArrayList<>();
-        tasksList.addAll(mapOfTasks.values());
-        return tasksList;
+    public List<Task> getAllTasks() {
+        return new ArrayList<>(mapOfTasks.values());
     }
 
     @Override
-    public ArrayList<Subtask> getAllSubtasks() {
-        ArrayList<Subtask> subtasksList = new ArrayList<>();
-        subtasksList.addAll(mapOfSubtasks.values());
-        return subtasksList;
+    public List<Subtask> getAllSubtasks() {
+        return new ArrayList<>(mapOfSubtasks.values());
     }
 
     @Override
-    public ArrayList<Epic> getAllEpics() {
-        ArrayList<Epic> epicsList = new ArrayList<>();
-        epicsList.addAll(mapOfEpics.values());
-        return epicsList;
+    public List<Epic> getAllEpics() {
+        return new ArrayList<>(mapOfEpics.values());
     }
 
     @Override
-    public ArrayList<Subtask> getEpicSubtasks(Epic epic) {
-        ArrayList<Subtask> list = new ArrayList<>();
+    public List<Subtask> getEpicSubtasks(Epic epic) {
+        List<Subtask> list = new ArrayList<>();
         for (int i : epic.getSubtasksId()) {
             if (mapOfSubtasks.containsKey(i)) {
                 list.add(mapOfSubtasks.get(i));
@@ -207,7 +203,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
+    public List<Task> getHistory() {
         return hm.getHistory();
     }
 }

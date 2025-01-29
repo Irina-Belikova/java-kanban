@@ -12,6 +12,7 @@ import tasks.Task;
 import tasks.TaskStatus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 class InMemoryTaskManagerTest {
     static TaskManager tm = Managers.getDefault();
@@ -49,7 +50,7 @@ class InMemoryTaskManagerTest {
         assertNotNull(task2, "Задача не найдена.");
         assertEquals(task1, task2, "Задачи не совпадают.");
 
-        final ArrayList<Task> tasks = tm.getAllTasks();
+        final List<Task> tasks = tm.getAllTasks();
 
         assertNotNull(tasks, "Задачи не возвращаются.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
@@ -62,7 +63,7 @@ class InMemoryTaskManagerTest {
         assertNotNull(epic2, "Эпик не найден.");
         assertEquals(epic_1, epic2, "Эпики не совпадают.");
 
-        final ArrayList<Epic> epics = tm.getAllEpics();
+        final List<Epic> epics = tm.getAllEpics();
 
         assertNotNull(epics, "Эпики не возвращаются.");
         assertEquals(1, epics.size(), "Неверное количество эпиков.");
@@ -76,7 +77,7 @@ class InMemoryTaskManagerTest {
         assertNotNull(subtask2, "Подзадача не найдена.");
         assertEquals(subtask_1, subtask2, "Подзадачи не совпадают.");
 
-        final ArrayList<Subtask> subtasks = tm.getAllSubtasks();
+        final List<Subtask> subtasks = tm.getAllSubtasks();
 
         assertNotNull(subtasks, "Подзадачи не возвращаются.");
         assertEquals(1, subtasks.size(), "Неверное количество подзадач.");
@@ -84,7 +85,7 @@ class InMemoryTaskManagerTest {
 
         assertEquals(subtask_1.getEpicId(), epicId, "Подзадача не принадлежит эпику.");
 
-        ArrayList<Subtask> listEpicSubtasks = tm.getEpicSubtasks(epic_1);
+        List<Subtask> listEpicSubtasks = tm.getEpicSubtasks(epic_1);
 
         assertFalse(listEpicSubtasks.isEmpty(), "Список подзадач не найден.");
         assertTrue(listEpicSubtasks.contains(subtask_1), "Подзадача не добавлена в список подзадач эпика.");
@@ -138,7 +139,7 @@ class InMemoryTaskManagerTest {
         Task upTask = new Task(task01.getId(), "задача-1", "описание зд-1", TaskStatus.IN_PROGRESS);
         task01 = tm1.changeTask(upTask);
         tm1.getTaskById(task01.getId());
-        ArrayList<Task> historyList = tm1.getHistory();
+        List<Task> historyList = tm1.getHistory();
         Task oldTask1 = historyList.get(0);
         Task newTask1 = historyList.get(1);
 
