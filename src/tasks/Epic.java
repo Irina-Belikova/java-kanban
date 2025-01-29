@@ -18,6 +18,18 @@ public class Epic extends Task {
         this.subtasksId = subtasksId;
     }
 
+    public Epic(int id, String name, String description, TaskStatus status, ArrayList<Integer> subtasksId) {
+        super(name, description);
+        this.id = id;
+        this.status = status;
+        this.subtasksId = subtasksId;
+    }
+
+    @Override
+    public Task getOldTask() {
+        return (new Epic(this.id, this.name, this.description, this.status, this.subtasksId));
+    }
+
     public ArrayList<Integer> getSubtasksId() {
         return subtasksId;
     }

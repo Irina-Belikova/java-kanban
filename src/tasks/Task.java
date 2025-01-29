@@ -19,6 +19,10 @@ public class Task {
         this.status = status;
     }
 
+    public Task getOldTask() {
+        return (new Task(this.id, this.name, this.description, this.status));
+    }
+
     public int getId() {
         return id;
     }

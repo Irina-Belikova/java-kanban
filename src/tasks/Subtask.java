@@ -16,6 +16,11 @@ public class Subtask extends Task {
         this.status = status;
     }
 
+    @Override
+    public Task getOldTask() {
+        return (new Subtask(this.id, this.name, this.description, this.epicId, this.status));
+    }
+
     public int getEpicId() {
         return epicId;
     }
