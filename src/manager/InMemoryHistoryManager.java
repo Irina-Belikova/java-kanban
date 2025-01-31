@@ -8,6 +8,7 @@ import java.util.Objects;
 
 public class InMemoryHistoryManager implements HistoryManager {
     private final List<Task> listOfHistory = new LinkedList<>();
+    private static final int MAX_SIZE = 10;
 
     @Override
     public void add(Task task) {
@@ -16,9 +17,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         listOfHistory.add(task.getOldTask());
-        final int maxSize = 10;
 
-        if (listOfHistory.size() > maxSize) {
+        if (listOfHistory.size() > MAX_SIZE) {
             listOfHistory.removeFirst();
         }
     }
