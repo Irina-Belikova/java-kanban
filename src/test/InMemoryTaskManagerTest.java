@@ -9,9 +9,7 @@ import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
-import tasks.TaskStatus;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class InMemoryTaskManagerTest {
@@ -54,7 +52,7 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(tasks, "Задачи не возвращаются.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
-        assertEquals(task1, tasks.get(0), "Задачи не совпадают.");
+        assertEquals(task1, tasks.getFirst(), "Задачи не совпадают.");
     }
 
     //Проверка: эпик типа Epic создаётся в менеджере и добавляется в таблицу эпиков, эпик по Id находится.
@@ -67,7 +65,7 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(epics, "Эпики не возвращаются.");
         assertEquals(1, epics.size(), "Неверное количество эпиков.");
-        assertEquals(epic_1, epics.get(0), "Эпики не совпадают.");
+        assertEquals(epic_1, epics.getFirst(), "Эпики не совпадают.");
     }
 
     //Проверка: подзадача типа Subtask создаётся в менеджере и добавляется в таблицу подзадач, подзадача по Id находится,
@@ -81,7 +79,7 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(subtasks, "Подзадачи не возвращаются.");
         assertEquals(1, subtasks.size(), "Неверное количество подзадач.");
-        assertEquals(subtask_1, subtasks.get(0), "Подзадачи не совпадают.");
+        assertEquals(subtask_1, subtasks.getFirst(), "Подзадачи не совпадают.");
 
         assertEquals(subtask_1.getEpicId(), epicId, "Подзадача не принадлежит эпику.");
 
@@ -129,27 +127,26 @@ class InMemoryTaskManagerTest {
         assertEquals(0, subtask_3.getId(), "Подзадачу можно добавить в подзадачу.");
     }
 
-    //проверка сохранения в истории просмотров предыдущей версии задачи и её данных
+    //проверка заполнения истории задач и удаления из истории повторных просмотров задачи
     @Test
     void shouldGetHistory() {
         Task task01 = new Task("задача-1", "описание зд-1");
         TaskManager tm1 = Managers.getDefault();
         task01 = tm1.addTasks(task01);
         tm1.getTaskById(task01.getId());
-        Task upTask = new Task(task01.getId(), "задача-1", "описание зд-1", TaskStatus.IN_PROGRESS);
-        task01 = tm1.changeTask(upTask);
         tm1.getTaskById(task01.getId());
         List<Task> historyList = tm1.getHistory();
-        Task oldTask1 = historyList.get(0);
-        Task newTask1 = historyList.get(1);
 
         assertNotNull(historyList, "Список истории просмотров пуст.");
-        assertEquals(oldTask1.getId(), newTask1.getId(), "Id задач не равны.");
-        assertEquals(oldTask1.getName(), newTask1.getName(), "Названия задач не равны.");
-        assertEquals(oldTask1.getDescription(), newTask1.getDescription(), "Описания задач не равны.");
-        assertNotEquals(oldTask1.getStatus(), newTask1.getStatus(), "Статусы задач одинаковы.");
+        assertEquals(1, historyList.size(), "Предыдущий просмотр задачи не удаляется.");
     }
 
-    //Проверять эпик на добавление самого в себя, думаю, не имеет смысла, т.к. добавление подзадачи в список эпика
-    //происходит в момент создания подзадачи в менеджере. Этот метод принимает только объекты типа Subtask.
+    //проверка удаления подзадачи из эпика при удалении самой подзадачи
+    @Test
+    void shouldDeleteSubtaskFromEpic() {
+        tm.removeSubtaskById(subtaskId);
+        List<Subtask> listOfSubtasks = tm.getEpicSubtasks(epic_1);
+
+        assertTrue(listOfSubtasks.isEmpty(), "Подзадача не удалилась из списка подзадач эпика.");
+    }
 }
