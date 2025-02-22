@@ -7,8 +7,8 @@ import tasks.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List; //по аналогии с комментариями к InMemoryHistoryManager исправила в методах
-import java.util.Map;  //возвращение интерфейса List вместо класса ArrayList
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> mapOfTasks = new HashMap<>();
@@ -122,6 +122,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskById(int id) {
         mapOfTasks.remove(id);
+        hm.remove(id);
     }
 
     @Override
@@ -132,6 +133,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.deleteSubtask(id);
         mapOfSubtasks.remove(id);
         checkEpicStatus(epic);
+        hm.remove(id);
     }
 
     @Override
@@ -139,8 +141,10 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = mapOfEpics.get(id);
         for (int index : epic.getSubtasksId()) {
             mapOfSubtasks.remove(index);
+            hm.remove(index);
         }
         mapOfEpics.remove(id);
+        hm.remove(id);
     }
 
     @Override
