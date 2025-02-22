@@ -91,7 +91,7 @@ class InMemoryTaskManagerTest {
 
     //неизменность всех полей задачи при добавлении в менеджер
     @Test
-    void ShouldTasksFieldsEqual() {
+    void shouldTasksFieldsEqual() {
         assertEquals(taskId, task2.getId(), "Id задач не равны.");
         assertEquals(task1.getName(), task2.getName(), "Имена задач не равны.");
         assertEquals(task1.getDescription(), task2.getDescription(), "Описания задач не равны.");
@@ -100,7 +100,7 @@ class InMemoryTaskManagerTest {
 
     //неизменность всех полей эпика при добавлении в менеджер
     @Test
-    void ShouldEpicsFieldsEqual() {
+    void shouldEpicsFieldsEqual() {
         assertEquals(epicId, epic2.getId(), "Id эпиков не равны.");
         assertEquals(epic1.getName(), epic2.getName(), "Имена эпиков не равны.");
         assertEquals(epic1.getDescription(), epic2.getDescription(), "Описания эпиков не равны.");
@@ -110,7 +110,7 @@ class InMemoryTaskManagerTest {
 
     //неизменность всех полей подзадачи при добавлении в менеджер
     @Test
-    void ShouldSubtasksFieldsEqual() {
+    void shouldSubtasksFieldsEqual() {
         assertEquals(subtaskId, subtask2.getId(), "Id подзадач не равны.");
         assertEquals(subtask1.getName(), subtask2.getName(), "Имена подзадач не равны.");
         assertEquals(subtask1.getDescription(), subtask2.getDescription(), "Описания подзадач не равны.");
@@ -121,10 +121,10 @@ class InMemoryTaskManagerTest {
     //проверка, что подзадачи нельзя добавлять в подзадачи
     @Test
     void shouldNotAddSubtaskInSubtask() {
-        Subtask subtask_3 = new Subtask("подзадача-3", "описание пзд-3", subtask1.getId());
-        subtask_3 = tm.addSubtasks(subtask_3);
+        Subtask subtask3 = new Subtask("подзадача-3", "описание пзд-3", subtask1.getId());
+        subtask3 = tm.addSubtasks(subtask3);
 
-        assertEquals(0, subtask_3.getId(), "Подзадачу можно добавить в подзадачу.");
+        assertEquals(0, subtask3.getId(), "Подзадачу можно добавить в подзадачу.");
     }
 
     //проверка заполнения истории задач и удаления из истории повторных просмотров задачи
