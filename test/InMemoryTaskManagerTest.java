@@ -147,4 +147,29 @@ class InMemoryTaskManagerTest {
 
         assertTrue(listOfSubtasks.isEmpty(), "Подзадача не удалилась из списка подзадач эпика.");
     }
+
+    //проверка удаления всех задач из истории при удалении всех задач
+    @Test
+    void shouldClearHistoryIfClearTasks() {
+        tm.getTaskById(taskId);
+        tm.getEpicById(epicId);
+        tm.getSubtaskById(subtaskId);
+        tm.clearSubtasks();
+        List<Task> historyList = tm.getHistory();
+
+        assertEquals(2, historyList.size(), "Все подзадачи не удаляются из истории.");
+
+        tm.clearTasks();
+        historyList = tm.getHistory();
+
+        assertEquals(1, historyList.size(), "Все задачи не удаляются из истории.");
+
+        tm.getTaskById(taskId);
+        tm.getEpicById(epicId);
+        tm.getSubtaskById(subtaskId);
+        tm.clearEpics();
+        historyList = tm.getHistory();
+
+        assertEquals(1, historyList.size(), "Все эпики и подзадачи не удаляются из истории.");
+    }
 }
