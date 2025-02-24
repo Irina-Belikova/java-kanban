@@ -151,25 +151,30 @@ class InMemoryTaskManagerTest {
     //проверка удаления всех задач из истории при удалении всех задач
     @Test
     void shouldClearHistoryIfClearTasks() {
-        tm.getTaskById(taskId);
-        tm.getEpicById(epicId);
-        tm.getSubtaskById(subtaskId);
-        tm.clearSubtasks();
-        List<Task> historyList = tm.getHistory();
+        TaskManager tm1 = Managers.getDefault();
+
+        Task task01 = tm1.addTasks(new Task("задача-1", "описание зд-1"));
+        Epic epic01 = tm1.addEpics(new Epic("эпик-1", "описание эпика -1"));
+        Subtask subtask01 = tm1.addSubtasks(new Subtask("подзадача1", "описание пзд1", epic01.getId()));
+
+        tm1.getTaskById(task01.getId());
+        tm1.getEpicById(epic01.getId());
+        tm1.getSubtaskById(subtask01.getId());
+        tm1.clearSubtasks();
+        List<Task> historyList = tm1.getHistory();
 
         assertEquals(2, historyList.size(), "Все подзадачи не удаляются из истории.");
 
-        tm.clearTasks();
-        historyList = tm.getHistory();
+        tm1.clearTasks();
+        historyList = tm1.getHistory();
 
         assertEquals(1, historyList.size(), "Все задачи не удаляются из истории.");
 
-        tm.getTaskById(taskId);
-        tm.getEpicById(epicId);
-        tm.getSubtaskById(subtaskId);
-        tm.clearEpics();
-        historyList = tm.getHistory();
+        Subtask subtask02 = tm1.addSubtasks(new Subtask("подзадача-2", "описание пзд-2", epic01.getId()));
+        tm1.getSubtaskById(subtask02.getId());
+        tm1.clearEpics();
+        historyList = tm1.getHistory();
 
-        assertEquals(1, historyList.size(), "Все эпики и подзадачи не удаляются из истории.");
+        assertTrue(historyList.isEmpty(), "Все эпики и подзадачи не удаляются из истории.");
     }
 }
