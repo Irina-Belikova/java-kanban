@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class OptionalClass {
-    
     private static final String FILE_FOR_SAVE = "src/resources/storage.csv";
 
     public static void main(String[] args) {
