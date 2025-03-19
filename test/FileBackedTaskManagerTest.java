@@ -1,8 +1,7 @@
+import manager.FileBackedTaskManager;
 import manager.Managers;
 import manager.TaskManager;
-import org.junit.jupiter.api.Test;
-import tasks.Epic;
-import tasks.Subtask;
+import org.junit.jupiter.api.*;
 import tasks.Task;
 
 import java.io.BufferedReader;
@@ -11,68 +10,64 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-import static java.io.File.createTempFile;
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest {
-    static File tmpFile;
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
+    File tempFile;
 
-    static {
-        try {
-            tmpFile = createTempFile("storage", ".csv");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    protected FileBackedTaskManagerTest() throws IOException {
     }
 
-    static TaskManager manager = Managers.getDefault(tmpFile);
-    Task task1;
-    Epic epic1;
-    Subtask subtask1;
+    @Override
+    protected TaskManager createManager() throws IOException {
+        tempFile = File.createTempFile("storage", ".csv");
+        return Managers.getDefault(tempFile);
+    }
+
+    //Проверка: задача типа Task создаётся в менеджере и добавляется в таблицу задач, задача по Id находится,
+    //задача сохраняется в файл
+    @Override
+    @Test
+    void shouldBeAddTasks() {
+        super.shouldBeAddTasks();
+        assertNotEquals(0L, tempFile.length(), "Данные в файле на сохраняются.");
+    }
+
+    //Проверка: эпик типа Epic создаётся в менеджере и добавляется в таблицу эпиков, эпик по Id находится,
+    //сохраняется в файл
+    @Override
+    @Test
+    void shouldBeAddEpics() {
+        super.shouldBeAddEpics();
+        assertNotEquals(0L, tempFile.length(), "Данные в файле на сохраняются.");
+    }
+
+    //Проверка: подзадача типа Subtask создаётся в менеджере и добавляется в таблицу подзадач, подзадача по Id находится,
+    //подзадача добавляется в список подзадач эпика, список подзадач эпика не пустой, сохраняется в файл
+    @Override
+    @Test
+    void shouldBeAddSubtasks() {
+        super.shouldBeAddSubtasks();
+        assertNotEquals(0L, tempFile.length(), "Данные в файле на сохраняются.");
+    }
 
     //проверка восстановления данных из файла
     @Test
     void shouldBeLoadFromFile() {
-        task1 = manager.addTasks(new Task("задача-1", "описание зд-1"));
-        TaskManager newManager = Managers.getDefault(tmpFile);
+        Task task1 = tm.addTasks(new Task("задача-1", "описание зд-1"));
+        TaskManager newManager = Managers.getDefault(tempFile);
         List<Task> tasks = newManager.getAllTasks();
 
         assertNotNull(tasks, "Данные не восстановились.");
     }
 
-    //проверка создания всех задач и сохранения данных в файл
+    //проверка удаления подзадач, если их эпик удаляется и получения пустого файла
+    @Override
     @Test
-    void shouldBeAddAllTypeOfTasksAndSaveInFile() {
-        task1 = manager.addTasks(new Task("задача-1", "описание зд-1"));
-        epic1 = manager.addEpics(new Epic("эпик-1", "описание эпика -1"));
-        subtask1 = manager.addSubtasks(new Subtask("подзадача-1", "описание пзд-1", epic1.getId()));
-        List<Task> tasks = manager.getAllTasks();
-        List<Epic> epics = manager.getAllEpics();
-        List<Subtask> subtasks = manager.getAllSubtasks();
+    void shouldClearSubtasksIfTheirEpicClear() throws IOException {
+        super.shouldClearSubtasksIfTheirEpicClear();
 
-        assertEquals(1, tasks.size(), "Неверное количество задач.");
-        assertEquals(1, epics.size(), "Неверное количество эпиков.");
-        assertEquals(1, subtasks.size(), "Неверное количество подзадач.");
-        assertNotEquals(0L, tmpFile.length(), "Данные в файле на сохраняются.");
-    }
-
-    //проверка удаления всех типов задач и получения пустого файла
-    @Test
-    void shouldBeClearAllTypeOfTasks() throws IOException {
-        task1 = manager.addTasks(new Task("задача-1", "описание зд-1"));
-        epic1 = manager.addEpics(new Epic("эпик-1", "описание эпика -1"));
-        subtask1 = manager.addSubtasks(new Subtask("подзадача-1", "описание пзд-1", epic1.getId()));
-        manager.clearTasks();
-        manager.clearEpics();
-        List<Task> tasks = manager.getAllTasks();
-        List<Epic> epics = manager.getAllEpics();
-        List<Subtask> subtasks = manager.getAllSubtasks();
-
-        assertEquals(0, tasks.size(), "Все задачи не удаляются.");
-        assertEquals(0, epics.size(), "Все эпики не удаляются.");
-        assertEquals(0, subtasks.size(), "После удаления эпика его подзадачи не удалились.");
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(tmpFile))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(tempFile))) {
             assertNull(reader.readLine(), "Данные из файла не удалились.");
         }
     }

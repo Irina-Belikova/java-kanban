@@ -33,6 +33,7 @@ public class OptionalClass {
 
         System.out.println("новый менеджер");
         TaskManager newManager = Managers.getDefault(storageFile);
+        Task task3 = newManager.addTasks(new Task("задача-3", "описание зд-3"));
         System.out.println(newManager.getAllTasks());
         System.out.println(newManager.getAllEpics());
         System.out.println(newManager.getAllSubtasks());
@@ -50,6 +51,4 @@ public class OptionalClass {
         }
         return file;
     }
-
-
 }

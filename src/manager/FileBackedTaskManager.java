@@ -9,9 +9,6 @@ import tasks.TaskStatus;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -21,7 +18,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.file = file;
     }
 
-    public void save() {
+    private void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
 
             if (!mapOfTasks.isEmpty() || !mapOfEpics.isEmpty() || !mapOfSubtasks.isEmpty()) {
@@ -49,7 +46,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static FileBackedTaskManager loadFromFile(File file) {
         final FileBackedTaskManager result = new FileBackedTaskManager(file);
-        List<Integer> findMax = new ArrayList<>();
 
         if (file.length() == 0) {
             return result;
@@ -69,22 +65,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     case "TASK":
                         int taskId = Integer.parseInt(index);
                         Task task = new Task(taskId, name, description, TaskStatus.valueOf(status));
-                        mapOfTasks.put(taskId, task);
-                        findMax.add(taskId);
+                        result.mapOfTasks.put(taskId, task);
+                       // id = Math.max(id, taskId);
+                        result.id = Math.max(result.id, taskId);
                         break;
                     case "EPIC":
                         int epcId = Integer.parseInt(index);
                         Epic epic = new Epic(epcId, name, description, TaskStatus.valueOf(status));
-                        mapOfEpics.put(epcId, epic);
-                        findMax.add(epcId);
+                        result.mapOfEpics.put(epcId, epic);
+                      //  id = Math.max(id, epcId);
+                        result.id = Math.max(result.id, epcId);
                         break;
                     case "SUBTASK":
                         int subtaskId = Integer.parseInt(index);
                         int epicId = Integer.parseInt(epicIndex);
                         Subtask subtask = new Subtask(subtaskId, name, description, epicId, TaskStatus.valueOf(status));
-                        mapOfSubtasks.put(subtaskId, subtask);
-                        findMax.add(subtaskId);
-                        Epic epic1 = mapOfEpics.get(epicId);
+                        result.mapOfSubtasks.put(subtaskId, subtask);
+                        //id = Math.max(id, subtaskId);
+                        result.id = Math.max(result.id, subtaskId);
+                        Epic epic1 = result.mapOfEpics.get(epicId);
                         epic1.getSubtasksId().add(subtaskId);
                         break;
                 }
@@ -92,7 +91,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (IOException exception) {
             throw new ManagerSaveException("Ошибка работы с файлом.");
         }
-        id = Collections.max(findMax) + 1;
         return result;
     }
 
