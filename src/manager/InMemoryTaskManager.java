@@ -5,10 +5,9 @@ import tasks.Subtask;
 import tasks.Task;
 import tasks.TaskStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> mapOfTasks = new HashMap<>();
@@ -51,6 +50,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = mapOfEpics.get(subtask.getEpicId());
         epic.getSubtasksId().add(subtask.getId());
         checkEpicStatus(epic);
+        checkEpicTime(epic);
         return subtask;
     }
 
@@ -112,6 +112,9 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = mapOfEpics.get(id);
             epic.getSubtasksId().clear();
             epic.setStatus(TaskStatus.NEW);
+            epic.setStartTime(null);
+            epic.setDuration(Duration.ZERO);
+            epic.setEndTime(null);
         }
         for (int id : mapOfSubtasks.keySet()) {
             hm.remove(id);
@@ -145,6 +148,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.deleteSubtask(id);
         mapOfSubtasks.remove(id);
         checkEpicStatus(epic);
+        checkEpicTime(epic);
         hm.remove(id);
     }
 
@@ -176,6 +180,7 @@ public class InMemoryTaskManager implements TaskManager {
         mapOfSubtasks.put(subtask.getId(), subtask);
         Epic epic = mapOfEpics.get(subtask.getEpicId());
         checkEpicStatus(epic);
+        checkEpicTime(epic);
         return subtask;
     }
 
@@ -191,7 +196,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void checkEpicStatus(Epic epic) {
-        ArrayList<Subtask> list = new ArrayList<>();
+        List<Subtask> list = new ArrayList<>();
         for (int index : epic.getSubtasksId()) {
             list.add(mapOfSubtasks.get(index));
         }
@@ -221,5 +226,24 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getHistory() {
         return hm.getHistory();
+    }
+
+    private void checkEpicTime(Epic epic) {
+        List<Subtask> list = getEpicSubtasks(epic);
+
+        Duration duration = list.stream()
+                .map(Subtask::getDuration)
+                .reduce(Duration.ZERO, Duration::plus);
+        epic.setDuration(duration);
+
+        Optional<LocalDateTime> start = list.stream()
+                .map(Subtask::getStartTime)
+                .min(LocalDateTime::compareTo);
+        start.ifPresent(epic::setStartTime);
+
+        Optional<LocalDateTime> end = list.stream()
+                .map(Subtask::getEndTime)
+                .max(LocalDateTime::compareTo);
+        end.ifPresent(epic::setEndTime);
     }
 }

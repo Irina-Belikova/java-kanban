@@ -5,7 +5,6 @@ import file.ManagerSaveException;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
-import tasks.TaskStatus;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -55,37 +54,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             while (reader.ready()) {
                 String line = reader.readLine();
                 String[] split = line.split(",");
-                String index = split[0];
-                String name = split[2];
-                String status = split[3];
-                String description = split[4];
-                String epicIndex = split[5];
+                Task task = CsvFormat.fromString(line);
+                result.id = CsvFormat.findMaxIndex(line) + 1;
 
                 switch (split[1]) {
-                    case "TASK":
-                        int taskId = Integer.parseInt(index);
-                        Task task = new Task(taskId, name, description, TaskStatus.valueOf(status));
-                        result.mapOfTasks.put(taskId, task);
-                       // id = Math.max(id, taskId);
-                        result.id = Math.max(result.id, taskId);
-                        break;
-                    case "EPIC":
-                        int epcId = Integer.parseInt(index);
-                        Epic epic = new Epic(epcId, name, description, TaskStatus.valueOf(status));
-                        result.mapOfEpics.put(epcId, epic);
-                      //  id = Math.max(id, epcId);
-                        result.id = Math.max(result.id, epcId);
-                        break;
-                    case "SUBTASK":
-                        int subtaskId = Integer.parseInt(index);
-                        int epicId = Integer.parseInt(epicIndex);
-                        Subtask subtask = new Subtask(subtaskId, name, description, epicId, TaskStatus.valueOf(status));
-                        result.mapOfSubtasks.put(subtaskId, subtask);
-                        //id = Math.max(id, subtaskId);
-                        result.id = Math.max(result.id, subtaskId);
-                        Epic epic1 = result.mapOfEpics.get(epicId);
-                        epic1.getSubtasksId().add(subtaskId);
-                        break;
+                    case "TASK" -> result.mapOfTasks.put(task.getId(), task);
+                    case "EPIC" -> result.mapOfEpics.put(task.getId(), (Epic) task);
+                    case "SUBTASK" -> {
+                        result.mapOfSubtasks.put(task.getId(), (Subtask) task);
+                        Subtask subtask = (Subtask) task;
+                        Epic epic1 = result.mapOfEpics.get(subtask.getEpicId());
+                        epic1.getSubtasksId().add(subtask.getId());
+                    }
                 }
             }
         } catch (IOException exception) {

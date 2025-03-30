@@ -5,6 +5,9 @@ import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -12,8 +15,8 @@ public class Main {
         TaskManager tm = Managers.getDefault();
 
         //Создание простых задач и внесение их в хеш-таблицу(+ присваивание id)
-        Task task1 = new Task("задача-1", "описание зд-1");
-        Task task2 = new Task("задача-2", "описание зд-2");
+        Task task1 = new Task("задача-1", "описание зд-1", LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(30));
+        Task task2 = new Task("задача-2", "описание зд-2", LocalDateTime.of(2025, 1, 1, 12, 40), Duration.ofMinutes(30));
         task1 = tm.addTasks(task1);
         task2 = tm.addTasks(task2);
 
@@ -24,9 +27,9 @@ public class Main {
         epic2 = tm.addEpics(epic2);
 
         //Создание подзадач, внесение их в хеш-таблицу(+ id) и связывание по id с эпиками(обмен id)
-        Subtask subtask1 = new Subtask("подзадача-1", "описание пзд-1", epic1.getId());
-        Subtask subtask2 = new Subtask("подзадача-2", "описание пзд-2", epic1.getId());
-        Subtask subtask3 = new Subtask("подзадача-3", "описание пзд-3", epic1.getId());
+        Subtask subtask1 = new Subtask("подзадача-1", "описание пзд-1", LocalDateTime.of(2025, 1, 1, 14, 0), Duration.ofMinutes(30), epic1.getId());
+        Subtask subtask2 = new Subtask("подзадача-2", "описание пзд-2", LocalDateTime.of(2025, 1, 2, 12, 0), Duration.ofMinutes(30), epic1.getId());
+        Subtask subtask3 = new Subtask("подзадача-3", "описание пзд-3", LocalDateTime.of(2025, 2, 1, 9, 0), Duration.ofMinutes(30), epic1.getId());
         subtask1 = tm.addSubtasks(subtask1);
         subtask2 = tm.addSubtasks(subtask2);
         subtask3 = tm.addSubtasks(subtask3);
