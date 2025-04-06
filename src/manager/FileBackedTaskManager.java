@@ -8,7 +8,9 @@ import tasks.Task;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -18,32 +20,35 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+        try {
+            List<String> lines = new ArrayList<>();
 
             if (!mapOfTasks.isEmpty() || !mapOfEpics.isEmpty() || !mapOfSubtasks.isEmpty()) {
-                writer.write(CsvFormat.headline());
+                lines.add(CsvFormat.headline());
             }
+            lines.addAll(mapOfTasks.values().stream()
+                    .map(CsvFormat::toString)
+                    .toList());
+            lines.addAll(mapOfEpics.values().stream()
+                    .map(CsvFormat::toString)
+                    .toList());
+            lines.addAll(mapOfSubtasks.values().stream()
+                    .map(CsvFormat::toString)
+                    .toList());
 
-            for (Map.Entry<Integer, Task> entry : mapOfTasks.entrySet()) {
-                Task task = entry.getValue();
-                writer.write(CsvFormat.toString(task));
+            if (!Files.exists(file.toPath())) {
+                throw new ManagerSaveException("Файл не существует.");
             }
-
-            for (Map.Entry<Integer, Epic> entry : mapOfEpics.entrySet()) {
-                Epic epic = entry.getValue();
-                writer.write(CsvFormat.toString(epic));
-            }
-
-            for (Map.Entry<Integer, Subtask> entry : mapOfSubtasks.entrySet()) {
-                Subtask subtask = entry.getValue();
-                writer.write(CsvFormat.toString(subtask));
-            }
+            Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка работы с файлом.");
         }
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
+        if (!Files.exists(file.toPath())) {
+            throw new ManagerSaveException("Файл не существует.");
+        }
         final FileBackedTaskManager result = new FileBackedTaskManager(file);
 
         if (file.length() == 0) {
@@ -150,5 +155,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Epic anEpic = super.changeEpic(newEpic);
         save();
         return anEpic;
+    }
+
+    public void testSave() {
+        save();
     }
 }

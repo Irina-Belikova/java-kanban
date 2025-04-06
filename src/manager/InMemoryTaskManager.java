@@ -101,20 +101,23 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        hm.add(mapOfTasks.get(id));
-        return mapOfTasks.get(id);
+        Optional<Task> task = Optional.ofNullable(mapOfTasks.get(id));
+        task.ifPresent(hm::add);
+        return task.orElse(null);
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        hm.add(mapOfSubtasks.get(id));
-        return mapOfSubtasks.get(id);
+        Optional<Subtask> subtask = Optional.ofNullable(mapOfSubtasks.get(id));
+        subtask.ifPresent(hm::add);
+        return subtask.orElse(null);
     }
 
     @Override
     public Epic getEpicById(int id) {
-        hm.add(mapOfEpics.get(id));
-        return mapOfEpics.get(id);
+        Optional<Epic> epic = Optional.ofNullable(mapOfEpics.get(id));
+        epic.ifPresent(hm::add);
+        return epic.orElse(null);
     }
 
     @Override
@@ -138,8 +141,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearEpics() {
-        mapOfEpics.keySet().forEach(id -> hm.remove(id));
-        mapOfSubtasks.keySet().forEach(hm::remove);
+        mapOfEpics.keySet().forEach(id -> hm.remove(id)); //не стала использовать ссылку на метод (как в стоке ниже),
+        mapOfSubtasks.keySet().forEach(hm::remove);              //чтобы понимание такой записи тоже было
         mapOfSubtasks.clear();
         mapOfEpics.clear();
     }

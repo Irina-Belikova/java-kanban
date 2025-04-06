@@ -11,7 +11,8 @@ public class Task {
     protected Duration duration;   //время выполнения задачи в минутах
     protected LocalDateTime startTime;  //дата и время начала выполнения задачи
 
-    public Task() {}
+    public Task() {
+    }
 
     public Task(String name, String description) {
         this.name = name;

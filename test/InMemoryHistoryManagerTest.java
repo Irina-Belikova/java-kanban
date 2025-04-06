@@ -7,6 +7,8 @@ import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,13 +22,15 @@ class InMemoryHistoryManagerTest {
 
     @BeforeEach
     void beforeEach() {
-        task1 = new Task("задача-1", "описание зд-1");
+        task1 = new Task("задача-1", "описание зд-1",
+                LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(30));
         task1 = tm.addTasks(task1);
 
         epic1 = new Epic("эпик-1", "описание эпика -1");
         epic1 = tm.addEpics(epic1);
 
-        subtask1 = new Subtask("подзадача-1", "описание пзд-1", epic1.getId());
+        subtask1 = new Subtask("подзадача-1", "описание пзд-1",
+                LocalDateTime.of(2025, 1, 1, 13, 0), Duration.ofMinutes(30), epic1.getId());
         subtask1 = tm.addSubtasks(subtask1);
     }
 

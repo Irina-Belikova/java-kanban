@@ -9,7 +9,7 @@ public class CsvFormat {
 
 
     public static String headline() {
-        return "id,type,name,status,description,startTime,duration,epicId\n";
+        return "id,type,name,status,description,startTime,duration,epicId";
     }
 
     public static String toString(Task task) {
@@ -19,7 +19,7 @@ public class CsvFormat {
                 task.getStatus() + "," +
                 task.getDescription() + "," +
                 task.getStartTime() + "," +
-                task.getDuration().toMinutes() + ", " + "\n";
+                task.getDuration().toMinutes() + ", ";
     }
 
     public static String toString(Epic epic) {
@@ -29,7 +29,7 @@ public class CsvFormat {
                 epic.getStatus() + "," +
                 epic.getDescription() + "," +
                 epic.getStartTime() + "," +
-                epic.getDuration().toMinutes() + ", " + "\n";
+                epic.getDuration().toMinutes() + ", ";
     }
 
     public static String toString(Subtask subtask) {
@@ -40,7 +40,7 @@ public class CsvFormat {
                 subtask.getDescription() + "," +
                 subtask.getStartTime() + "," +
                 subtask.getDuration().toMinutes() + "," +
-                subtask.getEpicId() + "\n";
+                subtask.getEpicId();
     }
 
     public static Task fromString(String value) {
@@ -66,7 +66,7 @@ public class CsvFormat {
             duration = Duration.ofMinutes(Long.parseLong(span));
         }
 
-        if(!index.equals("id")) {
+        if (!index.equals("id")) {
             id = Integer.parseInt(index);
         }
 

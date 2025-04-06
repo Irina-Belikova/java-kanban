@@ -41,7 +41,7 @@ public class OptionalClass {
         System.out.println("новый менеджер");
         TaskManager newManager = Managers.getDefault(storageFile);
         Task task3 = newManager.addTasks(new Task("задача-3", "описание зд-3",
-                LocalDateTime.of(2025, 1, 1, 13, 0), Duration.ofMinutes(30)));
+                LocalDateTime.of(2025, 1, 1, 17, 0), Duration.ofMinutes(30)));
         System.out.println(newManager.getAllTasks());
         System.out.println(newManager.getAllEpics());
         System.out.println(newManager.getAllSubtasks());

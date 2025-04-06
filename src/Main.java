@@ -54,12 +54,12 @@ public class Main {
         Task newTask = tm.getTaskById(1);
         Epic newEpic = tm.getEpicById(epic1.getId());
         Subtask newSubtask = tm.getSubtaskById(subtask3.getId());
-//        tm.clearTasks();
-//        tm.clearEpics();
-//        tm.clearSubtasks();
-//        tm.removeEpicById(epic1.getId());
 
         printAllTasks(tm);
+
+        System.out.println("\n" + tm.getSubtaskById(subtask3.getId()));
+        System.out.println(tm.getEpicById(epic2.getId()));
+        System.out.println(tm.getEpicById(1));
 
     }
 
