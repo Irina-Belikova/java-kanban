@@ -17,7 +17,7 @@ public class Main {
 
         //Создание простых задач и внесение их в хеш-таблицу(+ присваивание id)
         Task task1 = new Task("задача-1", "описание зд-1", LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(30));
-        Task task2 = new Task("задача-2", "описание зд-2", LocalDateTime.of(2025, 1, 1, 12, 20), Duration.ofMinutes(30));
+        Task task2 = new Task("задача-2", "описание зд-2", LocalDateTime.of(2025, 1, 1, 12, 40), Duration.ofMinutes(30));
         Task task3 = new Task("задача-3", "описание зд-3");
         Task task4 = new Task("задача-4", "описание зд-4", LocalDateTime.of(2025, 1, 3, 12, 20), Duration.ofMinutes(30));
         task1 = tm.addTasks(task1);
@@ -33,7 +33,7 @@ public class Main {
 
         //Создание подзадач, внесение их в хеш-таблицу(+ id) и связывание по id с эпиками(обмен id)
         Subtask subtask1 = new Subtask("подзадача-1", "описание пзд-1",
-                LocalDateTime.of(2025, 1, 1, 12, 40), Duration.ofMinutes(30), epic1.getId());
+                LocalDateTime.of(2025, 1, 1, 13, 40), Duration.ofMinutes(30), epic1.getId());
         Subtask subtask2 = new Subtask("подзадача-2", "описание пзд-2",
                 LocalDateTime.of(2025, 1, 2, 12, 0), Duration.ofMinutes(30), epic1.getId());
         Subtask subtask3 = new Subtask("подзадача-3", "описание пзд-3",

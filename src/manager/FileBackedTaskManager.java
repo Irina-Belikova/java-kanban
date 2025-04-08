@@ -76,6 +76,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (IOException exception) {
             throw new ManagerSaveException("Ошибка работы с файлом.");
         }
+        result.getPrioritizedTasks();
         return result;
     }
 

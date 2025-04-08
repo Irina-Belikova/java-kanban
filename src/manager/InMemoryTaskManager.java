@@ -13,6 +13,9 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> mapOfTasks = new HashMap<>();
     protected final Map<Integer, Subtask> mapOfSubtasks = new HashMap<>();
     protected final Map<Integer, Epic> mapOfEpics = new HashMap<>();
+    protected final TreeSet<Task> treeOfTasks = new TreeSet<>((t1, t2) ->
+            t1.getStartTime().compareTo(t2.getStartTime()));
+
     protected int id = 1;
     protected final HistoryManager hm = Managers.getHistory();
 
@@ -30,11 +33,9 @@ public class InMemoryTaskManager implements TaskManager {
             mapOfTasks.put(task.getId(), task);
             return task;
         }
-        TreeSet<Task> treeSet = getPrioritizedTasks();
-        boolean isNotAddTask = treeSet.stream()
-                .anyMatch(treeTask -> checkCrossTime(task, treeTask));
+        getPrioritizedTasks();
 
-        if (!isNotAddTask || treeSet.isEmpty()) {
+        if (!isCrossTask(task) || treeOfTasks.isEmpty()) {
             task.setId(generateId());
             mapOfTasks.put(task.getId(), task);
         }
@@ -56,14 +57,13 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtask.getId() != 0 || subtask.getEpicId() == 0 || !mapOfEpics.containsKey(subtask.getEpicId())) {
             return subtask;
         }
-        TreeSet<Task> treeSet = getPrioritizedTasks();
+        getPrioritizedTasks();
         boolean isNotAddSubtask;
 
-        if (subtask.getStartTime() == null || treeSet.isEmpty()) {
+        if (subtask.getStartTime() == null || treeOfTasks.isEmpty()) {
             isNotAddSubtask = false;
         } else {
-            isNotAddSubtask = treeSet.stream()
-                    .anyMatch(treeTask -> checkCrossTime(subtask, treeTask));
+            isNotAddSubtask = isCrossTask(subtask);
         }
 
         if (!isNotAddSubtask) {
@@ -124,6 +124,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void clearTasks() {
         mapOfTasks.keySet().forEach(id -> hm.remove(id));
         mapOfTasks.clear();
+        getPrioritizedTasks();
     }
 
     @Override
@@ -137,6 +138,7 @@ public class InMemoryTaskManager implements TaskManager {
         });
         mapOfSubtasks.keySet().forEach(hm::remove);
         mapOfSubtasks.clear();
+        getPrioritizedTasks();
     }
 
     @Override
@@ -145,12 +147,14 @@ public class InMemoryTaskManager implements TaskManager {
         mapOfSubtasks.keySet().forEach(hm::remove);              //чтобы понимание такой записи тоже было
         mapOfSubtasks.clear();
         mapOfEpics.clear();
+        getPrioritizedTasks();
     }
 
     @Override
     public void removeTaskById(int id) {
         mapOfTasks.remove(id);
         hm.remove(id);
+        getPrioritizedTasks();
     }
 
     @Override
@@ -163,6 +167,7 @@ public class InMemoryTaskManager implements TaskManager {
         checkEpicStatus(epic);
         checkEpicTime(epic);
         hm.remove(id);
+        getPrioritizedTasks();
     }
 
     @Override
@@ -174,6 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         mapOfEpics.remove(id);
         hm.remove(id);
+        getPrioritizedTasks();
     }
 
     @Override
@@ -181,31 +187,27 @@ public class InMemoryTaskManager implements TaskManager {
         if (!mapOfTasks.containsKey(task.getId())) {
             return task;
         }
-        TreeSet<Task> treeSet = getPrioritizedTasks();
-        treeSet.remove(mapOfTasks.get(task.getId()));
-        boolean isNotChangeTask = treeSet.stream()
-                .anyMatch(treeTask -> checkCrossTime(task, treeTask));
+        treeOfTasks.remove(mapOfTasks.get(task.getId()));
 
-        if (!isNotChangeTask) {
+        if (!isCrossTask(task)) {
             mapOfTasks.put(task.getId(), task);
         }
+        getPrioritizedTasks();
         return task;
     }
 
     @Override
     public Subtask changeSubtask(Subtask subtask) {
-        TreeSet<Task> treeSet = getPrioritizedTasks();
-        treeSet.remove(mapOfSubtasks.get(subtask.getId()));
-        boolean isNotChangeTask = treeSet.stream()
-                .anyMatch(treeTask -> checkCrossTime(subtask, treeTask));
+        treeOfTasks.remove(mapOfSubtasks.get(subtask.getId()));
 
-        if (!mapOfSubtasks.containsKey(subtask.getId()) || isNotChangeTask) {
+        if (!mapOfSubtasks.containsKey(subtask.getId()) || isCrossTask(subtask)) {
             return subtask;
         }
         mapOfSubtasks.put(subtask.getId(), subtask);
         Epic epic = mapOfEpics.get(subtask.getEpicId());
         checkEpicStatus(epic);
         checkEpicTime(epic);
+        getPrioritizedTasks();
         return subtask;
     }
 
@@ -277,21 +279,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public TreeSet<Task> getPrioritizedTasks() {
-        Comparator<Task> comparator = new Comparator<Task>() {
-            @Override
-            public int compare(Task t1, Task t2) {
-                return t1.getStartTime().compareTo(t2.getStartTime());
-            }
-        };
-
-        TreeSet<Task> treeOfTasks = new TreeSet<>(comparator);
         mapOfTasks.values().stream()
                 .filter(task -> Objects.nonNull(task.getStartTime()))
                 .forEach(treeOfTasks::add);
         mapOfSubtasks.values().stream()
                 .filter(subtask -> Objects.nonNull(subtask.getStartTime()))
                 .forEach(treeOfTasks::add);
-
         return treeOfTasks;
     }
 
@@ -301,5 +294,10 @@ public class InMemoryTaskManager implements TaskManager {
             isCross = false;
         }
         return isCross;
+    }
+
+    private boolean isCrossTask(Task task) {
+        return treeOfTasks.stream()
+                .anyMatch(treeTask -> checkCrossTime(task, treeTask));
     }
 }
