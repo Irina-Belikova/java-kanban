@@ -16,10 +16,13 @@ public class Main {
         TaskManager tm = Managers.getDefault();
 
         //Создание простых задач и внесение их в хеш-таблицу(+ присваивание id)
-        Task task1 = new Task("задача-1", "описание зд-1", LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(30));
-        Task task2 = new Task("задача-2", "описание зд-2", LocalDateTime.of(2025, 1, 1, 12, 40), Duration.ofMinutes(30));
+        Task task1 = new Task("задача-1", "описание зд-1",
+                LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(30));
+        Task task2 = new Task("задача-2", "описание зд-2",
+                LocalDateTime.of(2025, 1, 1, 12, 40), Duration.ofMinutes(30));
         Task task3 = new Task("задача-3", "описание зд-3");
-        Task task4 = new Task("задача-4", "описание зд-4", LocalDateTime.of(2025, 1, 3, 12, 20), Duration.ofMinutes(30));
+        Task task4 = new Task("задача-4", "описание зд-4",
+                LocalDateTime.of(2025, 1, 3, 12, 20), Duration.ofMinutes(30));
         task1 = tm.addTasks(task1);
         task2 = tm.addTasks(task2);
         task3 = tm.addTasks(task3);
@@ -57,7 +60,6 @@ public class Main {
 
         printAllTasks(tm);
 
-        System.out.println("\n" + tm.getSubtaskById(subtask3.getId()));
         System.out.println(tm.getEpicById(epic2.getId()));
         System.out.println(tm.getEpicById(1));
 

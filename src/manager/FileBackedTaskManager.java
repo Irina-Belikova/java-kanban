@@ -63,20 +63,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 result.id = CsvFormat.findMaxIndex(line) + 1;
 
                 switch (split[1]) {
-                    case "TASK" -> result.mapOfTasks.put(task.getId(), task);
+                    case "TASK" -> {
+                        result.mapOfTasks.put(task.getId(), task);
+                        result.addSortedTasks(task);
+                    }
                     case "EPIC" -> result.mapOfEpics.put(task.getId(), (Epic) task);
                     case "SUBTASK" -> {
                         result.mapOfSubtasks.put(task.getId(), (Subtask) task);
                         Subtask subtask = (Subtask) task;
                         Epic epic1 = result.mapOfEpics.get(subtask.getEpicId());
                         epic1.getSubtasksId().add(subtask.getId());
+                        result.addSortedTasks(subtask);
                     }
                 }
             }
         } catch (IOException exception) {
             throw new ManagerSaveException("Ошибка работы с файлом.");
         }
-        result.getPrioritizedTasks();
         return result;
     }
 
