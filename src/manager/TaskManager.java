@@ -50,5 +50,4 @@ public interface TaskManager {
 
     List<Task> getPrioritizedTasks();
 
-    void addSortedTasks(Task task);
 }

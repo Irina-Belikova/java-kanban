@@ -286,8 +286,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .anyMatch(treeTask -> checkCrossTime(task, treeTask));
     }
 
-    @Override
-    public void addSortedTasks(Task task) {
+    protected void addSortedTasks(Task task) {
         if (task.getStartTime() != null && (!isCrossTask(task) || sortedTasks.isEmpty())) {
             sortedTasks.add(task);
         }
