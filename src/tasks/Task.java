@@ -1,10 +1,18 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Task {
     protected int id;              //номер задачи(уникальный)
     protected String name;         //название задачи
     protected String description;  //описание подробностей задачи
     protected TaskStatus status;   //статус задачи
+    protected Duration duration;   //время выполнения задачи в минутах
+    protected LocalDateTime startTime;  //дата и время начала выполнения задачи
+
+    public Task() {
+    }
 
     public Task(String name, String description) {
         this.name = name;
@@ -12,15 +20,25 @@ public class Task {
         status = TaskStatus.NEW;
     }
 
-    public Task(int id, String name, String description, TaskStatus status) {
+    public Task(String name, String description, LocalDateTime startTime, Duration duration) {
+        this.name = name;
+        this.description = description;
+        status = TaskStatus.NEW;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    public Task(int id, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public Task getOldTask() {
-        return (new Task(this.id, this.name, this.description, this.status));
+        return (new Task(this.id, this.name, this.description, this.status, this.startTime, this.duration));
     }
 
     public int getId() {
@@ -55,13 +73,35 @@ public class Task {
         this.status = status;
     }
 
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status=" + status +
+                ", status=" + status + '\'' +
+                ", startTime=" + startTime + '\'' +
+                ", duration=" + duration +
                 '}';
     }
 }

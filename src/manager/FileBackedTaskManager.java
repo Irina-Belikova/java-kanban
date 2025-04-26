@@ -5,11 +5,12 @@ import file.ManagerSaveException;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
-import tasks.TaskStatus;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -19,32 +20,35 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+        try {
+            List<String> lines = new ArrayList<>();
 
             if (!mapOfTasks.isEmpty() || !mapOfEpics.isEmpty() || !mapOfSubtasks.isEmpty()) {
-                writer.write(CsvFormat.headline());
+                lines.add(CsvFormat.headline());
             }
+            lines.addAll(mapOfTasks.values().stream()
+                    .map(CsvFormat::toString)
+                    .toList());
+            lines.addAll(mapOfEpics.values().stream()
+                    .map(CsvFormat::toString)
+                    .toList());
+            lines.addAll(mapOfSubtasks.values().stream()
+                    .map(CsvFormat::toString)
+                    .toList());
 
-            for (Map.Entry<Integer, Task> entry : mapOfTasks.entrySet()) {
-                Task task = entry.getValue();
-                writer.write(CsvFormat.toString(task));
+            if (!Files.exists(file.toPath())) {
+                throw new ManagerSaveException("Файл не существует.");
             }
-
-            for (Map.Entry<Integer, Epic> entry : mapOfEpics.entrySet()) {
-                Epic epic = entry.getValue();
-                writer.write(CsvFormat.toString(epic));
-            }
-
-            for (Map.Entry<Integer, Subtask> entry : mapOfSubtasks.entrySet()) {
-                Subtask subtask = entry.getValue();
-                writer.write(CsvFormat.toString(subtask));
-            }
+            Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка работы с файлом.");
         }
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
+        if (!Files.exists(file.toPath())) {
+            throw new ManagerSaveException("Файл не существует.");
+        }
         final FileBackedTaskManager result = new FileBackedTaskManager(file);
 
         if (file.length() == 0) {
@@ -55,37 +59,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             while (reader.ready()) {
                 String line = reader.readLine();
                 String[] split = line.split(",");
-                String index = split[0];
-                String name = split[2];
-                String status = split[3];
-                String description = split[4];
-                String epicIndex = split[5];
+                Task task = CsvFormat.fromString(line);
+                result.id = CsvFormat.findMaxIndex(line) + 1;
 
                 switch (split[1]) {
-                    case "TASK":
-                        int taskId = Integer.parseInt(index);
-                        Task task = new Task(taskId, name, description, TaskStatus.valueOf(status));
-                        result.mapOfTasks.put(taskId, task);
-                       // id = Math.max(id, taskId);
-                        result.id = Math.max(result.id, taskId);
-                        break;
-                    case "EPIC":
-                        int epcId = Integer.parseInt(index);
-                        Epic epic = new Epic(epcId, name, description, TaskStatus.valueOf(status));
-                        result.mapOfEpics.put(epcId, epic);
-                      //  id = Math.max(id, epcId);
-                        result.id = Math.max(result.id, epcId);
-                        break;
-                    case "SUBTASK":
-                        int subtaskId = Integer.parseInt(index);
-                        int epicId = Integer.parseInt(epicIndex);
-                        Subtask subtask = new Subtask(subtaskId, name, description, epicId, TaskStatus.valueOf(status));
-                        result.mapOfSubtasks.put(subtaskId, subtask);
-                        //id = Math.max(id, subtaskId);
-                        result.id = Math.max(result.id, subtaskId);
-                        Epic epic1 = result.mapOfEpics.get(epicId);
-                        epic1.getSubtasksId().add(subtaskId);
-                        break;
+                    case "TASK" -> {
+                        result.mapOfTasks.put(task.getId(), task);
+                        result.addSortedTasks(task);
+                    }
+                    case "EPIC" -> result.mapOfEpics.put(task.getId(), (Epic) task);
+                    case "SUBTASK" -> {
+                        result.mapOfSubtasks.put(task.getId(), (Subtask) task);
+                        Subtask subtask = (Subtask) task;
+                        Epic epic1 = result.mapOfEpics.get(subtask.getEpicId());
+                        epic1.getSubtasksId().add(subtask.getId());
+                        result.addSortedTasks(subtask);
+                    }
                 }
             }
         } catch (IOException exception) {
@@ -170,5 +159,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Epic anEpic = super.changeEpic(newEpic);
         save();
         return anEpic;
+    }
+
+    public void testSave() {
+        save();
     }
 }
