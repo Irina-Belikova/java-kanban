@@ -25,6 +25,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task addTasks(Task task) {
+        if (task == null) {
+            throw new NullPointerException("Задача не может быть пустой.");
+        }
+
         if (task.getId() != 0 || isCrossTask(task)) {
             return task;
         }
@@ -37,6 +41,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic addEpics(Epic epic) {
+        if (epic == null) {
+            throw new NullPointerException("Эпик не может быть пустым.");
+        }
         if (epic.getId() != 0) {
             return epic;
         }
@@ -47,6 +54,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask addSubtasks(Subtask subtask) {
+        if (subtask == null) {
+            throw new NullPointerException("Подзадача не может быть пустой.");
+        }
+
         if (subtask.getId() != 0 || subtask.getEpicId() == 0 ||
                 !mapOfEpics.containsKey(subtask.getEpicId()) || isCrossTask(subtask)) {
             return subtask;
@@ -177,10 +188,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task changeTask(Task task) {
+        if (task == null) {
+            throw new NullPointerException("Задача не может быть пустой.");
+        }
+
+        Task oldTask = mapOfTasks.get(task.getId());
+        sortedTasks.remove(mapOfTasks.get(task.getId()));
+
         if (!mapOfTasks.containsKey(task.getId()) || isCrossTask(task)) {
+            addSortedTasks(oldTask);
             return task;
         }
-        sortedTasks.remove(mapOfTasks.get(task.getId()));
         mapOfTasks.put(task.getId(), task);
         addSortedTasks(task);
         return task;
@@ -188,9 +206,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask changeSubtask(Subtask subtask) {
+        if (subtask == null) {
+            throw new NullPointerException("Подзадача не может быть пустой.");
+        }
+
+        Subtask oldSubtask = mapOfSubtasks.get(subtask.getId());
         sortedTasks.remove(mapOfSubtasks.get(subtask.getId()));
 
         if (!mapOfSubtasks.containsKey(subtask.getId()) || isCrossTask(subtask)) {
+            addSortedTasks(oldSubtask);
             return subtask;
         }
         mapOfSubtasks.put(subtask.getId(), subtask);
@@ -203,6 +227,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic changeEpic(Epic newEpic) {
+        if (newEpic == null) {
+            throw new NullPointerException("Эпик не может быть пустым.");
+        }
+
         if (!mapOfEpics.containsKey(newEpic.getId())) {
             return newEpic;
         }
