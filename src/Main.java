@@ -48,7 +48,7 @@ public class Main {
         subtask4 = tm.addSubtasks(subtask4);
 
         Task upTask = new Task(task2.getId(), "задача-2", "описание зд-2", TaskStatus.IN_PROGRESS,
-                LocalDateTime.of(2025, 1, 1, 12, 20), Duration.ofMinutes(30));
+                LocalDateTime.of(2025, 1, 1, 12, 45), Duration.ofMinutes(30));
         task2 = tm.changeTask(upTask);
         Subtask upSubtask = new Subtask(subtask3.getId(), "подзадача-3", "описание пзд-3",
                 LocalDateTime.of(2025, 1, 1, 9, 50), Duration.ofMinutes(30),

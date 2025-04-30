@@ -2,6 +2,7 @@ package tasks;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Task {
     protected int id;              //номер задачи(уникальный)
@@ -103,5 +104,18 @@ public class Task {
                 ", startTime=" + startTime + '\'' +
                 ", duration=" + duration +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || this.getClass() != obj.getClass()) return false;
+        Task otherTask = (Task) obj;
+        return Objects.equals(id, otherTask.id)
+                && Objects.equals(name, otherTask.name)
+                && Objects.equals(description, otherTask.description)
+                && Objects.equals(status, otherTask.status)
+                && Objects.equals(duration, otherTask.duration)
+                && Objects.equals(startTime, otherTask.startTime);
     }
 }
