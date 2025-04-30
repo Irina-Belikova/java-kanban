@@ -1,6 +1,5 @@
 package server;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import file.ManagerSaveException;
@@ -16,11 +15,9 @@ import java.util.Optional;
 public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
 
     private final TaskManager manager;
-    private final Gson gson;
 
-    public SubtasksHandler(TaskManager manager, Gson gson) {
+    public SubtasksHandler(TaskManager manager) {
         this.manager = manager;
-        this.gson = gson;
     }
 
     @Override
@@ -44,16 +41,16 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleAllSubtasks(HttpExchange exchange, String method) throws IOException {
         try {
             switch (method) {
-                case "GET" -> {
+                case GET_TASK -> {
                     List<Subtask> subtasks = manager.getAllSubtasks();
                     String jsonString = gson.toJson(subtasks);
                     sendText(exchange, jsonString);
                 }
-                case "POST" -> {
+                case POST_TASK -> {
                     try {
                         InputStream inputStream = exchange.getRequestBody();
                         String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                        Subtask jsonSubtask = gson.fromJson(body, new HttpTaskServer.SubtaskTypeToken().getType());
+                        Subtask jsonSubtask = gson.fromJson(body, new SubtaskTypeToken().getType());
                         Subtask subtask = manager.addSubtasks(new Subtask(jsonSubtask.getName(), jsonSubtask.getDescription(),
                                 jsonSubtask.getStartTime(), jsonSubtask.getDuration(), jsonSubtask.getEpicId()));
                         if (subtask.getId() != 0) {
@@ -65,7 +62,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                         sendEmptyData(exchange, "Поля подзадачи не могут быть пустыми.");
                     }
                 }
-                case "DELETE" -> {
+                case DELETE_TASK -> {
                     manager.clearSubtasks();
                     sendSuccess(exchange, "Все подзадачи удалены.");
                 }
@@ -84,12 +81,12 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
         } else {
             try {
                 switch (method) {
-                    case "GET" -> sendText(exchange, gson.toJson(subtask));
-                    case "POST" -> {
+                    case GET_TASK -> sendText(exchange, gson.toJson(subtask));
+                    case POST_TASK -> {
                         try {
                             InputStream inputStream = exchange.getRequestBody();
                             String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                            Subtask updateSubtask = manager.changeSubtask(gson.fromJson(body, new HttpTaskServer.SubtaskTypeToken().getType()));
+                            Subtask updateSubtask = manager.changeSubtask(gson.fromJson(body, new SubtaskTypeToken().getType()));
                             Subtask aSubtask = manager.getSubtaskById(updateSubtask.getId());
                             if (updateSubtask.equals(aSubtask)) {
                                 sendSuccess(exchange, "Подзадача успешно обновлена.");
@@ -100,7 +97,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                             sendEmptyData(exchange, "Поля обновляемой подзадачи не могут быть пустыми.");
                         }
                     }
-                    case "DELETE" -> {
+                    case DELETE_TASK -> {
                         manager.removeSubtaskById(id);
                         sendSuccess(exchange, "Подзадача успешно удалена.");
                     }

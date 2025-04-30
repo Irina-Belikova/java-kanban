@@ -4,6 +4,7 @@ import manager.TaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.BaseHttpHandler;
 import server.HttpTaskServer;
 import tasks.Epic;
 import tasks.Subtask;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HttpTaskServerTest {
     TaskManager tm = Managers.getDefault();
     HttpTaskServer server = new HttpTaskServer(tm);
-    Gson gson = server.getGson();
+    Gson gson = BaseHttpHandler.getGson();
 
     @BeforeEach
     public void beforeEach() {

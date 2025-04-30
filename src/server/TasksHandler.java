@@ -1,6 +1,5 @@
 package server;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import file.ManagerSaveException;
@@ -15,11 +14,9 @@ import java.util.Optional;
 
 public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager manager;
-    private final Gson gson;
 
-    public TasksHandler(TaskManager manager, Gson gson) {
+    public TasksHandler(TaskManager manager) {
         this.manager = manager;
-        this.gson = gson;
     }
 
     @Override
@@ -43,16 +40,16 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleAllTasks(HttpExchange exchange, String method) throws IOException {
         try {
             switch (method) {
-                case "GET" -> {
+                case GET_TASK -> {
                     List<Task> tasks = manager.getAllTasks();
                     String jsonString = gson.toJson(tasks);
                     sendText(exchange, jsonString);
                 }
-                case "POST" -> {
+                case POST_TASK -> {
                     try {
                         InputStream inputStream = exchange.getRequestBody();
                         String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                        Task jsonTask = gson.fromJson(body, new HttpTaskServer.TaskTypeToken().getType());
+                        Task jsonTask = gson.fromJson(body, new TaskTypeToken().getType());
                         Task task = manager.addTasks(new Task(jsonTask.getName(), jsonTask.getDescription(),
                                 jsonTask.getStartTime(), jsonTask.getDuration()));
                         if (task.getId() != 0) {
@@ -64,7 +61,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                         sendEmptyData(exchange, "Поля задач не могут быть пустыми.");
                     }
                 }
-                case "DELETE" -> {
+                case DELETE_TASK -> {
                     manager.clearTasks();
                     sendSuccess(exchange, "Все задачи удалены.");
                 }
@@ -83,12 +80,12 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         } else {
             try {
                 switch (method) {
-                    case "GET" -> sendText(exchange, gson.toJson(task));
-                    case "POST" -> {
+                    case GET_TASK -> sendText(exchange, gson.toJson(task));
+                    case POST_TASK -> {
                         try {
                             InputStream inputStream = exchange.getRequestBody();
                             String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                            Task updateTask = manager.changeTask(gson.fromJson(body, new HttpTaskServer.TaskTypeToken().getType()));
+                            Task updateTask = manager.changeTask(gson.fromJson(body, new TaskTypeToken().getType()));
                             Task aTask = manager.getTaskById(updateTask.getId());
                             if (updateTask.equals(aTask)) {
                                 sendSuccess(exchange, "Задача успешно обновлена.");
@@ -99,7 +96,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                             sendEmptyData(exchange, "Поля обновляемой задачи не могут быть пустыми.");
                         }
                     }
-                    case "DELETE" -> {
+                    case DELETE_TASK -> {
                         manager.removeTaskById(id);
                         sendSuccess(exchange, "Задача успешно удалена.");
                     }

@@ -1,6 +1,5 @@
 package server;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import file.ManagerSaveException;
@@ -16,11 +15,10 @@ import java.util.Optional;
 
 public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private final TaskManager manager;
-    private final Gson gson;
+    private static final String WAY_VALUE = "subtasks";
 
-    public EpicsHandler(TaskManager manager, Gson gson) {
+    public EpicsHandler(TaskManager manager) {
         this.manager = manager;
-        this.gson = gson;
     }
 
     @Override
@@ -46,16 +44,16 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private void handleAllEpics(HttpExchange exchange, String method) throws IOException {
         try {
             switch (method) {
-                case "GET" -> {
+                case GET_TASK -> {
                     List<Epic> epics = manager.getAllEpics();
                     String jsonString = gson.toJson(epics);
                     sendText(exchange, jsonString);
                 }
-                case "POST" -> {
+                case POST_TASK -> {
                     try {
                         InputStream inputStream = exchange.getRequestBody();
                         String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                        Epic jsonEpic = gson.fromJson(body, new HttpTaskServer.EpicTypeToken().getType());
+                        Epic jsonEpic = gson.fromJson(body, new EpicTypeToken().getType());
                         Epic epic = manager.addEpics(new Epic(jsonEpic.getName(), jsonEpic.getDescription()));
                         if (epic.getId() != 0) {
                             sendSuccess(exchange, "Эпик успешно создан.");
@@ -66,7 +64,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                         sendEmptyData(exchange, "Поля эпика не могут быть пустыми.");
                     }
                 }
-                case "DELETE" -> {
+                case DELETE_TASK -> {
                     manager.clearEpics();
                     sendSuccess(exchange, "Все эпики удалены.");
                 }
@@ -85,12 +83,12 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         } else {
             try {
                 switch (method) {
-                    case "GET" -> sendText(exchange, gson.toJson(epic));
-                    case "POST" -> {
+                    case GET_TASK -> sendText(exchange, gson.toJson(epic));
+                    case POST_TASK -> {
                         try {
                             InputStream inputStream = exchange.getRequestBody();
                             String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                            Epic updateEpic = manager.changeEpic(gson.fromJson(body, new HttpTaskServer.EpicTypeToken().getType()));
+                            Epic updateEpic = manager.changeEpic(gson.fromJson(body, new EpicTypeToken().getType()));
                             Epic anEpic = manager.getEpicById(updateEpic.getId());
                             if (updateEpic.equals(anEpic)) {
                                 sendSuccess(exchange, "Эпик успешно обновлён.");
@@ -101,7 +99,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                             sendEmptyData(exchange, "Поля обновляемого эпика не могут быть пустыми.");
                         }
                     }
-                    case "DELETE" -> {
+                    case DELETE_TASK -> {
                         manager.removeEpicById(id);
                         sendSuccess(exchange, "Эпик успешно удалён.");
                     }
@@ -116,10 +114,10 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private void handleEpicSubtasks(HttpExchange exchange, String method, int id, String value) throws IOException {
         Epic epic = manager.getEpicById(id);
 
-        if (method.equals("GET")) {
+        if (method.equals(GET_TASK)) {
             if (epic == null) {
                 sendNotFound(exchange, "Не существует эпика с таким id: " + id + ".");
-            } else if (value.equals("subtasks")) {
+            } else if (value.equals(WAY_VALUE)) {
                 List<Subtask> subtasks = manager.getEpicSubtasks(epic);
                 sendText(exchange, gson.toJson(subtasks));
             } else {
